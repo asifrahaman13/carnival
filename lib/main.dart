@@ -5,7 +5,7 @@ import 'package:flutter/material.dart';
 import 'injection_container.dart' as di;
 
 void main() {
-   di.init();
+  di.init();
   runApp(const MyApp());
 }
 
@@ -43,7 +43,7 @@ class _MyHomePageState extends State<MyHomePage> {
     });
   }
 
-  static  final List<Widget> _widgetOptions = <Widget>[
+  static final List<Widget> _widgetOptions = <Widget>[
     HomeScreen(),
     SettingsScreen()
   ];
@@ -59,17 +59,7 @@ class _MyHomePageState extends State<MyHomePage> {
         onDrawerItemTap: _onDrawerItemTap,
         selectedDrawerIndex: _selectedDrawerIndex,
       ),
-      body: Column(
-        children: [
-          _widgetOptions.elementAt(_selectedDrawerIndex),
-          ElevatedButton(
-            onPressed: () {
-              Navigator.pop(context);
-            },
-            child: const Text('Go back!'),
-          ),
-        ],
-      ),
+      body: _widgetOptions.elementAt(_selectedDrawerIndex),
     );
   }
 }
