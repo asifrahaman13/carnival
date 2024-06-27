@@ -1,3 +1,4 @@
+// ignore: file_names
 import 'package:carnival/internal/use_cases/auth_service.dart';
 import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
@@ -17,7 +18,8 @@ class _HomeTabState extends State<HomeTab> {
     final result = await _authService.authenticate("username", "password");
     result.fold(
       (failure) => print("Authentication Failed"),
-      (authEntity) => print("#################### Authentication Success: ${authEntity.token}"),
+      (authEntity) => print(
+          "#################### Authentication Success: ${authEntity.token}"),
     );
   }
 

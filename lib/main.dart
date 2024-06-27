@@ -44,8 +44,8 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   static final List<Widget> _widgetOptions = <Widget>[
-    HomeScreen(),
-    SettingsScreen()
+    const HomeScreen(),
+    const SettingsScreen()
   ];
 
   @override
