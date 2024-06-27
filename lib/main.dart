@@ -1,14 +1,53 @@
 import 'package:carnival/presentation/drawer/AppDrawer.dart';
 import 'package:carnival/presentation/screens/HomeScreen.dart';
 import 'package:carnival/presentation/screens/SettingsScreen.dart';
+import 'package:carnival/utils/token.dart'; // This should include the logic to check and save tokens
 import 'package:flutter/material.dart';
-import 'injection_container.dart' as di;
+import 'package:firebase_core/firebase_core.dart';
+import 'package:google_sign_in/google_sign_in.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'injection_container.dart' as di; // Assuming you have dependency injection setup
+import 'firebase_options.dart';
 
-void main() {
-  di.init();
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await Firebase.initializeApp(
+    options: DefaultFirebaseOptions.currentPlatform,
+  );
+  di.init(); // Initialize dependency injection if needed
   runApp(const MyApp());
 }
 
+// Firebase sign-in function
+Future<UserCredential?> signInWithGoogle() async {
+  // Trigger the authentication flow
+  final GoogleSignInAccount? googleUser = await GoogleSignIn().signIn();
+
+  // Obtain the auth details from the request
+  final GoogleSignInAuthentication? googleAuth = await googleUser?.authentication;
+
+  // Create a new credential
+  final credential = GoogleAuthProvider.credential(
+    accessToken: googleAuth?.accessToken,
+    idToken: googleAuth?.idToken,
+  );
+
+  // Once signed in, return the UserCredential
+  var user = await FirebaseAuth.instance.signInWithCredential(credential);
+
+  if (googleAuth?.idToken != null) {
+    await saveUserToken(user.user!.displayName);
+  }
+  return user;
+}
+
+// Check if the user token exists
+Future<bool> userTokenExists() async {
+  String? token = await getUserToken();
+  return token != null && token.isNotEmpty;
+}
+
+// Your existing MyApp class
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
 
@@ -25,6 +64,7 @@ class MyApp extends StatelessWidget {
   }
 }
 
+// Your existing MyHomePage class
 class MyHomePage extends StatefulWidget {
   const MyHomePage({super.key, required this.title});
 
@@ -34,8 +74,23 @@ class MyHomePage extends StatefulWidget {
   State<MyHomePage> createState() => _MyHomePageState();
 }
 
+// Your existing _MyHomePageState class
 class _MyHomePageState extends State<MyHomePage> {
   int _selectedDrawerIndex = 0;
+  bool _isSignedIn = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _checkSignInStatus();
+  }
+
+  void _checkSignInStatus() async {
+    bool signedIn = await userTokenExists();
+    setState(() {
+      _isSignedIn = signedIn;
+    });
+  }
 
   void _onDrawerItemTap(int index) {
     setState(() {
@@ -45,11 +100,36 @@ class _MyHomePageState extends State<MyHomePage> {
 
   static final List<Widget> _widgetOptions = <Widget>[
     const HomeScreen(),
-    const SettingsScreen()
+    const SettingsScreen(),
   ];
+
+  // Trigger Google sign-in
+  Future<void> _handleSignIn() async {
+    try {
+      var user = await signInWithGoogle();
+      if (user != null) {
+        setState(() {
+          _isSignedIn = true; // Update the state to show the home screen
+        });
+      }
+    } catch (e) {
+      // Handle sign-in errors here
+      print('Error signing in with Google: $e');
+      // ignore: use_build_context_synchronously
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Failed to sign in with Google. Please try again.'),
+        ),
+      );
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
+    if (!_isSignedIn) {
+      return  LoginScreen(onSignIn: _handleSignIn);
+    }
+
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
@@ -60,6 +140,22 @@ class _MyHomePageState extends State<MyHomePage> {
         selectedDrawerIndex: _selectedDrawerIndex,
       ),
       body: _widgetOptions.elementAt(_selectedDrawerIndex),
+    );
+  }
+}
+
+class LoginScreen extends StatelessWidget {
+  final Future<void> Function() onSignIn;
+  
+  const LoginScreen({super.key, required this.onSignIn});
+
+  @override
+  Widget build(BuildContext context) {
+    return Center(
+      child: ElevatedButton(
+        onPressed: onSignIn,
+        child: const Text('Sign in with Google'),
+      ),
     );
   }
 }
