@@ -9,7 +9,7 @@ class AuthService {
   AuthService(this.repository);
 
   Future<Either<Failure, AuthEntity>> authenticate(
-      String username, String password) async {
-    return await repository.authenticate(username, password);
+      String token) async {
+    return await repository.authenticate(token);
   }
 }

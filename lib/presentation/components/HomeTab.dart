@@ -23,7 +23,7 @@ class _HomeTabState extends State<HomeTab> {
   }
 
   Future<void> _authenticate() async {
-    final result = await _authService.authenticate("username", "password");
+    final result = await _authService.authenticate("username");
     result.fold(
       (failure) => print("Authentication Failed"),
       (authEntity) => print(

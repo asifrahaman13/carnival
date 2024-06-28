@@ -4,5 +4,5 @@ import 'package:dartz/dartz.dart';
 
 abstract class AuthInterface {
   Future<Either<Failure, AuthEntity>> authenticate(
-      String username, String password);
+      String token);
 }

@@ -1,12 +1,14 @@
+import 'package:carnival/internal/use_cases/auth_service.dart';
 import 'package:carnival/presentation/drawer/AppDrawer.dart';
 import 'package:carnival/presentation/screens/HomeScreen.dart';
 import 'package:carnival/presentation/screens/SettingsScreen.dart';
-import 'package:carnival/utils/token.dart'; // This should include the logic to check and save tokens
+import 'package:carnival/utils/token.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:get_it/get_it.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'injection_container.dart' as di; // Assuming you have dependency injection setup
+import 'injection_container.dart' as di;
 import 'firebase_options.dart';
 
 void main() async {
@@ -14,9 +16,12 @@ void main() async {
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
-  di.init(); // Initialize dependency injection if needed
+  di.init();
   runApp(const MyApp());
 }
+
+final AuthService _authService = GetIt.instance<AuthService>();
+
 
 // Firebase sign-in function
 Future<UserCredential?> signInWithGoogle() async {
@@ -24,7 +29,8 @@ Future<UserCredential?> signInWithGoogle() async {
   final GoogleSignInAccount? googleUser = await GoogleSignIn().signIn();
 
   // Obtain the auth details from the request
-  final GoogleSignInAuthentication? googleAuth = await googleUser?.authentication;
+  final GoogleSignInAuthentication? googleAuth =
+      await googleUser?.authentication;
 
   // Create a new credential
   final credential = GoogleAuthProvider.credential(
@@ -36,7 +42,20 @@ Future<UserCredential?> signInWithGoogle() async {
   var user = await FirebaseAuth.instance.signInWithCredential(credential);
 
   if (googleAuth?.idToken != null) {
-    await saveUserToken(user.user!.displayName);
+
+    print("#################### Google Auth Token: ${googleAuth!.idToken}");
+    print("############################################ User: $user");
+    final  result = await _authService.authenticate(googleAuth.idToken!);
+    result.fold(
+      (failure) => print("Authentication Failed"),
+      (authEntity) async {
+        final token = authEntity.token;
+        print(
+            "#################### Authentication Success: ${token}");
+
+        await saveUserToken(token);
+      },
+    );
   }
   return user;
 }
@@ -59,7 +78,7 @@ class MyApp extends StatelessWidget {
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
         useMaterial3: true,
       ),
-      home: const MyHomePage(title: 'Flutter Demo Home Page'),
+      home: const MyHomePage(title: 'Carnival'),
     );
   }
 }
@@ -127,7 +146,7 @@ class _MyHomePageState extends State<MyHomePage> {
   @override
   Widget build(BuildContext context) {
     if (!_isSignedIn) {
-      return  LoginScreen(onSignIn: _handleSignIn);
+      return LoginScreen(onSignIn: _handleSignIn);
     }
 
     return Scaffold(
@@ -146,7 +165,7 @@ class _MyHomePageState extends State<MyHomePage> {
 
 class LoginScreen extends StatelessWidget {
   final Future<void> Function() onSignIn;
-  
+
   const LoginScreen({super.key, required this.onSignIn});
 
   @override
