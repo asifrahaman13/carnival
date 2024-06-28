@@ -28,7 +28,7 @@ class _HomeScreenState extends State<HomeScreen> {
     const HomeTab(),
     const DataTab(),
     const AssessmentTab(),
-    const RecommendationsTab(),
+    const Recommendationstab(),
     const WearableTab(),
   ];
 

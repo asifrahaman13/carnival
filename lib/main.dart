@@ -24,7 +24,6 @@ void main() async {
 
 final AuthService _authService = GetIt.instance<AuthService>();
 
-
 // Firebase sign-in function
 Future<UserCredential?> signInWithGoogle() async {
   // Trigger the authentication flow
@@ -44,16 +43,14 @@ Future<UserCredential?> signInWithGoogle() async {
   var user = await FirebaseAuth.instance.signInWithCredential(credential);
 
   if (googleAuth?.idToken != null) {
-
     print("#################### Google Auth Token: ${googleAuth!.idToken}");
     print("############################################ User: $user");
-    final  result = await _authService.authenticate(googleAuth.idToken!);
+    final result = await _authService.authenticate(googleAuth.idToken!);
     result.fold(
       (failure) => print("Authentication Failed"),
       (authEntity) async {
         final token = authEntity.token;
-        print(
-            "#################### Authentication Success: ${token}");
+        print("#################### Authentication Success: ${token}");
 
         await saveUserToken(token);
       },
@@ -68,7 +65,6 @@ Future<bool> userTokenExists() async {
   return token != null && token.isNotEmpty;
 }
 
-// Your existing MyApp class
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
 
@@ -85,7 +81,6 @@ class MyApp extends StatelessWidget {
   }
 }
 
-// Your existing MyHomePage class
 class MyHomePage extends StatefulWidget {
   const MyHomePage({super.key, required this.title});
 
@@ -95,7 +90,6 @@ class MyHomePage extends StatefulWidget {
   State<MyHomePage> createState() => _MyHomePageState();
 }
 
-// Your existing _MyHomePageState class
 class _MyHomePageState extends State<MyHomePage> {
   int _selectedDrawerIndex = 0;
   bool _isSignedIn = false;
