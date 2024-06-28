@@ -1,4 +1,3 @@
-// ignore: file_names
 import 'package:carnival/internal/use_cases/auth_service.dart';
 import 'package:carnival/utils/token.dart';
 import 'package:flutter/material.dart';
@@ -13,7 +12,7 @@ class HomeTab extends StatefulWidget {
 }
 
 class _HomeTabState extends State<HomeTab> {
-  String _userToken = '';
+  String _userDetails = '';
   final AuthService _authService = GetIt.instance<AuthService>();
 
   @override
@@ -22,30 +21,32 @@ class _HomeTabState extends State<HomeTab> {
     _loadUserToken();
   }
 
-  Future<void> _authenticate() async {
-    final result = await _authService.authenticate("username");
-    result.fold(
-      (failure) => print("Authentication Failed"),
-      (authEntity) => print(
-          "#################### Authentication Success: ${authEntity.token}"),
-    );
-  }
-
   Future<void> _loadUserToken() async {
     final token = await getUserToken();
-    print('^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^66 $token');
-    setState(() {
-      _userToken = token ?? 'No token found';
-    });
+    print(
+        "###########################################################################");
+    print(token);
+    final result = await _authService.validateUser(token!);
+    print(result);
+    result.fold(
+      (failure) {
+        setState(() {
+          _userDetails = 'Authentication Failed very sorry';
+        });
+      },
+      (userEntity) async {
+        final username = userEntity.name;
+        setState(() {
+          _userDetails = 'Authentication Success: $username';
+        });
+      },
+    );
   }
 
   @override
   Widget build(BuildContext context) {
     return Center(
-      child: ElevatedButton(
-        onPressed: _authenticate,
-        child: Text(_userToken),
-      ),
+      child: Text(_userDetails),
     );
   }
 }

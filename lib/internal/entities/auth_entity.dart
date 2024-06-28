@@ -1,5 +1,3 @@
-
-
 class AuthEntity {
   final String token;
   final User user;
@@ -59,6 +57,26 @@ class User {
       givenName: json['given_name'],
       familyName: json['family_name'],
       iat: json['iat'],
+      exp: json['exp'],
+    );
+  }
+}
+
+class UserEntity {
+  final String sub;
+  final String name;
+  final int exp;
+
+  UserEntity({
+    required this.sub,
+    required this.name,
+    required this.exp,
+  });
+
+  factory UserEntity.fromJson(Map<String, dynamic> json) {
+    return UserEntity(
+      sub: json['sub'],
+      name: json['name'],
       exp: json['exp'],
     );
   }

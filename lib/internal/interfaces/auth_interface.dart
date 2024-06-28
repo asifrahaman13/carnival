@@ -3,6 +3,6 @@ import 'package:carnival/internal/entities/auth_entity.dart';
 import 'package:dartz/dartz.dart';
 
 abstract class AuthInterface {
-  Future<Either<Failure, AuthEntity>> authenticate(
-      String token);
+  Future<Either<Failure, AuthEntity>> authenticate(String token);
+  Future<Either<Failure, UserEntity>> validateUser(String token);
 }

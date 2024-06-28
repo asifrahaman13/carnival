@@ -12,4 +12,8 @@ class AuthService {
       String token) async {
     return await repository.authenticate(token);
   }
+
+  Future<Either<Failure, UserEntity>> validateUser(String token) async {
+    return await repository.validateUser(token);
+  }
 }
